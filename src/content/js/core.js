@@ -287,7 +287,8 @@ let sessionId,
             debug: false,
             searchInputWaitForMs: 300,
             searchInputMaxAttempts: 20,
-            customIconPosition: false
+            customIconPosition: false,
+            allHostsPermissionRemoved: false
         }
     },
     /* may need to expand this out differently for use with v3, as adding a v3 to the URL for a v3 of radarr or sonarr gives some more or different info. 
@@ -588,6 +589,11 @@ async function getSettings() {
         data.sonarrRadarrLidarrAutosearchSettings.config.contextMenu = defaultSettings.config.contextMenu;
     }
 
+    // check config allHostsPermissionRemoved property
+    if (!data.sonarrRadarrLidarrAutosearchSettings.config.hasOwnProperty('allHostsPermissionRemoved')) {
+        data.sonarrRadarrLidarrAutosearchSettings.config.allHostsPermissionRemoved = defaultSettings.config.allHostsPermissionRemoved;
+    }
+
     return data.sonarrRadarrLidarrAutosearchSettings;
 }
 
@@ -624,6 +630,10 @@ async function setSettings(data) {
 
     if (!data.hasOwnProperty('injectedIconConfig')) {
         data.injectedIconConfig = defaultSettings.injectedIconConfig;
+    }
+
+    if (!data.hasOwnProperty('allHostsPermissionRemoved')) {
+        data.allHostsPermissionRemoved = defaultSettings.allHostsPermissionRemoved;
     }
 
     let obj = {

@@ -18,11 +18,60 @@ async function getCurrentTab() {
 /**
  * Get settings, set the extension icon and execute the content script
  */
-async function initRun(tabId, evt) {
+async function initRun(tabId, tab, evt) {
+    // check if tabId is undefined
+    if (tabId === undefined) {
+        return;
+    }
+
     await log(`running init from ${evt} event`);
     
     try {
         const settings = await getSettings();
+
+        if (tab !== null) {
+            log(['manifest permissions', browser.runtime.getManifest().permissions]);
+            log(['host permissions', browser.runtime.getManifest().host_permissions]);   
+            
+            // check if the servarr instance URL has the required permissions
+            var permissions = await browser.runtime.getManifest().permissions;
+
+            for (const site of settings.sites) {
+                // remove user and password from domain for urls looking like https://user:password@domain/path
+                let domain = site.domain.replace(/^(https?:\/\/)(.+):(.+)@/, '$1');
+
+                if (tab.url.includes(domain)) {
+                    log(['servarr site match found: ', site]);
+
+                    if (tab.url.indexOf(site.searchPath) === -1) {
+                        continue;
+                    }
+
+                    try {
+                        let permissionsRequest = {
+                            permissions: permissions,
+                            origins: [site.domain]
+                        };
+
+                        let contains = await browser.permissions.contains(permissionsRequest);
+
+                        if (contains) {
+                            log([`${site.domain} has permissions`, permissions]);
+                        } else {
+                            const granted = await browser.permissions.request(permissions);
+
+                            if (granted) {
+                                log([`permissions for ${site.domain} granted`, permissions]);
+                            } else {
+                                continue;
+                            }
+                        }
+                    } catch (error) {
+                        log(['error checking permissions', error]);
+                    }
+                }
+            }
+        }
 
         log('current tab', tabId);
 
@@ -44,14 +93,14 @@ async function initRun(tabId, evt) {
 }
 
 browser.tabs.onActivated.addListener(async function (activeInfo) {
-    initRun(activeInfo.tabId, 'onActivated')
+    initRun(activeInfo.tabId, null, 'onActivated')
 });
 
 browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     log(['change info status', changeInfo]);
 
     if (changeInfo.status == 'complete') {
-        initRun(tabId, 'onUpdated')
+        initRun(tabId, tab, 'onUpdated')
     }
 });
 
@@ -59,9 +108,14 @@ browser.runtime.onConnect.addListener(function(port) {
     switch (port.name) {
         case 'init':
             port.onMessage.addListener(async function () {
-                let tabId = await getCurrentTab();
-    
-                await initRun(tabId, 'onConnect');
+                let tab = await getCurrentTab();
+
+                // check if tab is null or undefined
+                if (tab === null || tab === undefined) {
+                    return;
+                }
+
+                await initRun(tab.id, tab, 'onConnect');
             });
             break;
 

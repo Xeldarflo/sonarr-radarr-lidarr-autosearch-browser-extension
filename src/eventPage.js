@@ -1,3 +1,17 @@
+
+
+// async function hasHostPermissionForActiveTab() {
+//     try {
+//         const [activeTab] = await browser.tabs.query({active: true, currentWindow: true});
+
+//         return activeTab.url ? await browser.permissions.contains({ origins: [activeTab.url] }) : false;
+//     }
+//     // catch error that occurs for special urls like about:
+//     catch (e) {
+//         return false;
+//     }
+// }
+  
 /**
  * Get settings, set the extension icon and execute the content script
  */
@@ -6,6 +20,54 @@ async function initRun(evt) {
     
     try {
         const settings = await getSettings();
+
+        log(['manifest permissions', browser.runtime.getManifest().permissions]);
+        log(['host permissions', browser.runtime.getManifest().host_permissions]);   
+        
+        // check if the servarr instance URL has the required permissions
+        var permissions = await browser.runtime.getManifest().permissions;
+
+        $.each(settings.sites,
+            async function (i, site) {
+                // remove user and password from domain for urls looking like https://user:password@domain/path
+                let domain = site.domain.replace(/^(https?:\/\/)(.+):(.+)@/, '$1');
+                if (window.location.href.includes(domain)) {
+                    log(['servarr site match found: ', site]);
+    
+                    if (window.location.href.indexOf(site.searchPath) === -1) {
+                        return;
+                    }
+                
+                    try {
+                        let permissionsRequest = {
+                            permissions: permissions,
+                            origins: [site.domain]
+                        };
+            
+                        // let contains = await hasHostPermissionForActiveTab();
+            
+                        // if (contains) {
+                        //     contains = await browser.permissions.contains(permissionsRequest);
+                        // }
+                        
+                        let contains = await browser.permissions.contains(permissionsRequest);
+            
+                        if (contains) {
+                            log([`${site.domain} has permissions`, permissions]);
+                        } else {
+                            const granted = await browser.permissions.request(permissions);
+                            
+                            if (granted) {
+                                log([`permissions for ${site.domain} granted`, permissions]);
+                            } else {
+                                return;
+                            }
+                        }
+                    } catch (error) {
+                        log(['error checking permissions', error]);                    
+                    }
+                }
+            });
 
         await setIcon(settings);
         await buildMenus(settings);

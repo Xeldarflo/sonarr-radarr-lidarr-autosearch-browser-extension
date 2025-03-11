@@ -1341,7 +1341,7 @@ async function init() {
     log(['settings.sites: ', settings.sites]);
 
     $.each(settings.sites,
-        function (i, site) {
+        async function (i, site) {
             // remove user and password from domain for urls looking like https://user:password@domain/path
             let domain = site.domain.replace(/^(https?:\/\/)(.+):(.+)@/, '$1');
             if (window.location.href.includes(domain)) {

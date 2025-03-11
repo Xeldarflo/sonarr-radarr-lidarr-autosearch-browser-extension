@@ -45,26 +45,29 @@
     }
   ],
   "permissions": [
-    // "*://*.imdb.com/*",
-    // "*://*.themoviedb.org/*",
-    // "*://*.thetvdb.com/*",
-    // "*://*.trakt.tv/*",
-    // "*://*.tvmaze.com/*",
-    // "*://*.musicbrainz.org/*",
-    // "*://*.letterboxd.com/*",
-    // "*://*.pogdesign.co.uk/*",
-    // "*://*.rottentomatoes.com/*",
-    // "*://*.metacritic.com/*",
-    // "*://*.simkl.com/*",
-    // "*://*.iptorrents*",
-    // "*://*.last.fm/*",
-    // "*://*.allocine.fr/*",
-    // "*://*.myanimelist.net/*",
-    // "*://*.betaseries.com/*",
-    // "*://*.primevideo.com/*",
-    "<all_urls>",
+    // "<all_urls>",
+    "*://*.imdb.com/*",
+    "*://*.themoviedb.org/*",
+    "*://*.thetvdb.com/*",
+    "*://*.trakt.tv/*",
+    "*://*.tvmaze.com/*",
+    "*://*.musicbrainz.org/*",
+    "*://*.letterboxd.com/*",
+    "*://*.pogdesign.co.uk/*",
+    "*://*.rottentomatoes.com/*",
+    "*://*.metacritic.com/*",
+    "*://*.simkl.com/*",
+    "*://*.iptorrents*",
+    "*://*.last.fm/*",
+    "*://*.allocine.fr/*",
+    "*://*.myanimelist.net/*",
+    "*://*.betaseries.com/*",
+    "*://*.primevideo.com/*",
     "storage",
     "activeTab",
-    "contextMenus"
+    "contextMenus"  
+  ],
+  "optional_permissions": [
+    "<all_urls>"
   ]
 }

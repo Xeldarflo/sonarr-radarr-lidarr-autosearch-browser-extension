@@ -69,7 +69,9 @@
     "*://*.allocine.fr/*",
     "*://*.myanimelist.net/*",
     "*://*.betaseries.com/*",
-    "*://*.primevideo.com/*",
+    "*://*.primevideo.com/*"
+  ],
+  "optional_host_permissions": [
     "<all_urls>"
   ]
 }
