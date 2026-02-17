@@ -879,3 +879,60 @@ async function callApi(request) {
 
     return response;
 }
+
+/**
+ * Contact Musicbrainz API and get the ID of a release-group.
+ * @param {string} artist (part of) the name of any of the release group artists 
+ * @param {string} releasegroup (part of) the release group's title (diacritics are ignored) 
+ * @param {string} type one type of the release-group (Album, Compilation, ...)
+ * @returns The ID from Musicbrainz of a release-group, or a empty string if it does not find anything or if there is an error.
+ */
+async function getReleaseGroupMBID(artist, releasegroup, type = "") {
+    var url = `https://musicbrainz.org/ws/2/release-group/?fmt=json&query=artistname:${artist} AND releasegroup:${releasegroup}`;
+    var res = await fetch(url, {
+        method: "GET",
+        headers: {
+            "User-Agent": "sonarr-radarr-lidarr-autosearch-browser-extension (https://github.com/trossr32/sonarr-radarr-lidarr-autosearch-browser-extension)",
+        },
+        })
+        .then((r) => r.json())
+        .then((data) => data)
+        .catch((e) => "");
+
+    if(res && res["release-groups"] && res["release-groups"].length > 0) {
+        if(!type){
+            return res["release-groups"][0].id;
+        }
+        //There is a "type" filter in the api but it seems to be bugged (it didn't work from my tests on some Albums) so i filter it manually.
+        for(let releaseGroup of res["release-groups"]){
+            if(releaseGroup["primary-type"] && releaseGroup["primary-type"] == type){
+                return releaseGroup.id;
+            } else if(releaseGroup["secondary-types"] && releaseGroup["secondary-types"].includes(type)){
+                return releaseGroup.id;
+            }
+        }
+    }
+    return "";
+}
+
+/**
+ * Contact Musicbrainz API and get the ID of an artist.
+ * @param {string} artist (part of) the artist's name (diacritics are ignored) 
+ * @returns The ID from Musicbrainz of an artist, or a empty string if it does not find anything or if there is an error.
+ */
+async function getArtistMBID(artist) {
+    var url = `http://musicbrainz.org/ws/2/artist?fmt=json&query=artist:${artist}`;
+    var res = await fetch(url, {
+        method: "GET",
+        headers: {
+            "User-Agent": "sonarr-radarr-lidarr-autosearch-browser-extension (https://github.com/trossr32/sonarr-radarr-lidarr-autosearch-browser-extension)",
+        },
+        })
+        .then((r) => r.json())
+        .then((data) => data)
+        .catch((e) => "");
+    if(res && res.artists && res.artists.length > 0) {
+        return res.artists[0].id;
+    }
+    return "";
+}

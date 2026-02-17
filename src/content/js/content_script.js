@@ -294,10 +294,10 @@ async function runServarrSearchInjection() {
             }
 
             const runEngine = function (candidates, sites, settingsObj) {
-                candidates.elements.forEach(function (el) {
+                candidates.elements.forEach(async function (el) {
                     if (!el || (el.hasAttribute && el.hasAttribute('data-servarr-icon'))) return;
 
-                    const term = (candidates.getSearch(el) || '').trim();
+                    const term = (await candidates.getSearch(el) || '').trim();
                     if (!term) return;
 
                     sites.forEach(function (site) {
